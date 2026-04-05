@@ -1,0 +1,23 @@
+{
+  "expected_pairs": 5,
+  "completed_pairs": 5,
+  "coverage": 1.0,
+  "ok_pairs": 5,
+  "error_pairs": 0,
+  "error_rate": 0.0,
+  "hit_pairs": 0,
+  "hit_rate": 0.0,
+  "mean_best_sim_target": 63.15,
+  "mean_sim_target": 11.0000856,
+  "mean_sim_source": 7.2077836,
+  "mean_sa": 4.6082414,
+  "mean_comp": 17.7846082,
+  "mean_rows_per_pair": 483.4,
+  "total_rows": 2417,
+  "total_seconds": 408.692857,
+  "mean_seconds_per_pair": 81.7385714,
+  "weight_label": "a1p2_b0p1_g0p7",
+  "alpha": 1.2,
+  "beta": 0.1,
+  "gamma": 0.7
+}

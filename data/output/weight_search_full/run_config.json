@@ -1,0 +1,188 @@
+{
+  "smiles_csv_path": "C:\\Users\\clash\\OneDrive\\Documents\\GitHub\\Mol-Morpher\\data\\input\\Smiles.csv",
+  "smiles_column": "smiles",
+  "notebook_path": "C:\\Users\\clash\\OneDrive\\Documents\\GitHub\\Mol-Morpher\\scripts\\multi_beam.ipynb",
+  "output_dir": "C:\\Users\\clash\\OneDrive\\Documents\\GitHub\\Mol-Morpher\\data\\output\\weight_search_full",
+  "weight_grid_mode": "focused",
+  "pair_mode": "all_ordered",
+  "size_metric": "length",
+  "min_size_diff": 80,
+  "max_pairs": 5,
+  "run_bidirectional": true,
+  "resume": true,
+  "write_intermediates": false,
+  "pair_random_seed": 42,
+  "quiet_pipeline_prints": true,
+  "search_overrides": {},
+  "weight_grid": [
+    {
+      "alpha": 0.8,
+      "beta": 0.05,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.05,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.05,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.1,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.1,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.1,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.2,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.2,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 0.8,
+      "beta": 0.2,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.05,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.05,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.05,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.1,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.1,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.1,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.2,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.2,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.0,
+      "beta": 0.2,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.05,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.05,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.05,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.1,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.1,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.1,
+      "gamma": 0.7
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.2,
+      "gamma": 0.3
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.2,
+      "gamma": 0.5
+    },
+    {
+      "alpha": 1.2,
+      "beta": 0.2,
+      "gamma": 0.7
+    }
+  ],
+  "smiles_count": 1291,
+  "pair_count": 5,
+  "ranking_metrics": [
+    {
+      "metric": "coverage",
+      "coefficient": 0.2,
+      "maximize": true
+    },
+    {
+      "metric": "hit_rate",
+      "coefficient": 0.35,
+      "maximize": true
+    },
+    {
+      "metric": "mean_best_sim_target",
+      "coefficient": 0.2,
+      "maximize": true
+    },
+    {
+      "metric": "mean_sim_target",
+      "coefficient": 0.1,
+      "maximize": true
+    },
+    {
+      "metric": "mean_sa",
+      "coefficient": 0.1,
+      "maximize": false
+    },
+    {
+      "metric": "error_rate",
+      "coefficient": 0.05,
+      "maximize": false
+    }
+  ]
+}

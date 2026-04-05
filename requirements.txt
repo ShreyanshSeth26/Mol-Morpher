@@ -1,0 +1,7 @@
+rdkit
+molvs
+pandas
+matplotlib
+pillow
+ipython
+notebook
