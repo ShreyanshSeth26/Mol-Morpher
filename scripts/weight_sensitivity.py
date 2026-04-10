@@ -1,5 +1,6 @@
 from __future__ import annotations 
 import csv 
+import hashlib 
 import json 
 import os 
 import random 
@@ -60,7 +61,8 @@ GAMMA_VALUES =WEIGHT_CANDIDATES [WEIGHT_GRID_MODE ]["gamma"]
 
 RUN_BIDIRECTIONAL =True 
 RESUME =True 
-WRITE_INTERMEDIATES =False 
+WRITE_INTERMEDIATES =True 
+WRITE_PAIR_CHANGE_REPORTS =True 
 PROGRESS_EVERY =20 
 PAIR_RANDOM_SEED =42 
 QUIET_PIPELINE_PRINTS =True 
@@ -157,13 +159,17 @@ class MetadataWriter :
         if self .sink_writer is None :
             return 
 
+        raw_smiles =row .get ("smiles","")
+        canonical_smiles =_canonicalize_smiles (raw_smiles )
+
         out ={
         "weight_label":self .weight_label ,
         "pair_id":self .pair_id ,
         "source":self .source ,
         "target":self .target ,
         "direction":self .direction ,
-        "smiles":row .get ("smiles",""),
+        "smiles":raw_smiles ,
+        "canonical_smiles":canonical_smiles ,
         "sa_score":row .get ("sa_score",""),
         "sim_source":row .get ("sim_source",""),
         "sim_target":row .get ("sim_target",""),
@@ -180,6 +186,177 @@ def _to_float (value :float |str )->float :
 
 def _parse_bool (value :str |bool )->bool :
     return str (value ).strip ().lower ()in {"1","true","yes","y"}
+
+def _canonicalize_smiles (smi :str )->str :
+    if not smi :
+        return ""
+
+    try :
+        mol =Chem .MolFromSmiles (smi )
+        if mol is None :
+            return smi 
+        return Chem .MolToSmiles (mol ,canonical =True ,isomericSmiles =True )
+    except Exception :
+        return smi 
+
+def _hash_lines (items :list [str ])->str :
+    payload ="\n".join (items )
+    return hashlib .sha256 (payload .encode ("utf-8")).hexdigest ()
+
+def write_pair_intermediate_signatures (interm_path :Path ,signature_path :Path )->None :
+    if not interm_path .exists ():
+        return 
+
+    per_pair :dict [tuple [str ,str ,str ],dict ]={}
+    with interm_path .open ("r",newline ="",encoding ="utf-8")as f :
+        reader =csv .DictReader (f )
+        for row in reader :
+            pair_id =str (row .get ("pair_id","")).strip ()
+            source =row .get ("source","")
+            target =row .get ("target","")
+            key =(pair_id ,source ,target )
+
+            if key not in per_pair :
+                per_pair [key ]={
+                "pair_id":pair_id ,
+                "source":source ,
+                "target":target ,
+                "rows":0 ,
+                "forward_rows":0 ,
+                "reverse_rows":0 ,
+                "sequence":[],
+                }
+
+            entry =per_pair [key ]
+            entry ["rows"]+=1 
+
+            direction =(row .get ("direction","")or "").strip ().lower ()
+            if direction =="forward":
+                entry ["forward_rows"]+=1 
+            elif direction =="reverse":
+                entry ["reverse_rows"]+=1 
+
+            canonical =(row .get ("canonical_smiles","")or "").strip ()
+            if not canonical :
+                canonical =_canonicalize_smiles ((row .get ("smiles","")or "").strip ())
+            entry ["sequence"].append (canonical )
+
+    fields =[
+    "pair_id",
+    "source",
+    "target",
+    "rows",
+    "forward_rows",
+    "reverse_rows",
+    "unique_smiles",
+    "smiles_set_hash",
+    "smiles_multiset_hash",
+    "smiles_sequence_hash",
+    ]
+
+    with signature_path .open ("w",newline ="",encoding ="utf-8")as f :
+        writer =csv .DictWriter (f ,fieldnames =fields )
+        writer .writeheader ()
+        for key in sorted (per_pair .keys (),key =lambda k :(int (k [0 ])if str (k [0 ]).isdigit ()else 0 ,k [1 ],k [2 ])):
+            entry =per_pair [key ]
+            sequence :list [str ]=entry ["sequence"]
+            sequence_nonempty =[s for s in sequence if s ]
+            unique_sorted =sorted (set (sequence_nonempty ))
+            multiset_sorted =sorted (sequence_nonempty )
+
+            writer .writerow ({
+            "pair_id":entry ["pair_id"],
+            "source":entry ["source"],
+            "target":entry ["target"],
+            "rows":entry ["rows"],
+            "forward_rows":entry ["forward_rows"],
+            "reverse_rows":entry ["reverse_rows"],
+            "unique_smiles":len (unique_sorted ),
+            "smiles_set_hash":_hash_lines (unique_sorted )if unique_sorted else "",
+            "smiles_multiset_hash":_hash_lines (multiset_sorted )if multiset_sorted else "",
+            "smiles_sequence_hash":_hash_lines (sequence_nonempty )if sequence_nonempty else "",
+            })
+
+def write_cross_weight_pair_change_report (weight_dirs :list [Path ],output_csv_path :Path ,output_json_path :Path )->None :
+    per_pair :dict [tuple [str ,str ,str ],dict [str ,dict ]]={}
+
+    for wdir in weight_dirs :
+        signature_path =wdir /"pair_intermediate_signatures.csv"
+        if not signature_path .exists ():
+            continue 
+
+        with signature_path .open ("r",newline ="",encoding ="utf-8")as f :
+            reader =csv .DictReader (f )
+            for row in reader :
+                key =(str (row .get ("pair_id","")).strip (),row .get ("source","")or "",row .get ("target","")or "")
+                if key not in per_pair :
+                    per_pair [key ]={}
+                per_pair [key ][wdir .name ]=row 
+
+    fields =[
+    "pair_id",
+    "source",
+    "target",
+    "weights_present",
+    "distinct_set_hashes",
+    "distinct_multiset_hashes",
+    "all_set_identical",
+    "all_multiset_identical",
+    "min_rows",
+    "max_rows",
+    "min_unique_smiles",
+    "max_unique_smiles",
+    ]
+
+    pairs_total =0 
+    pairs_with_set_change =0 
+    pairs_with_multiset_change =0 
+
+    with output_csv_path .open ("w",newline ="",encoding ="utf-8")as f :
+        writer =csv .DictWriter (f ,fieldnames =fields )
+        writer .writeheader ()
+
+        for key in sorted (per_pair .keys (),key =lambda k :(int (k [0 ])if str (k [0 ]).isdigit ()else 0 ,k [1 ],k [2 ])):
+            rows_by_weight =per_pair [key ]
+            weights_present =len (rows_by_weight )
+            set_hashes ={(r .get ("smiles_set_hash","")or "")for r in rows_by_weight .values ()}
+            multiset_hashes ={(r .get ("smiles_multiset_hash","")or "")for r in rows_by_weight .values ()}
+            row_counts =[int (r .get ("rows",0 )or 0 )for r in rows_by_weight .values ()]
+            unique_counts =[int (r .get ("unique_smiles",0 )or 0 )for r in rows_by_weight .values ()]
+
+            all_set_identical =len (set_hashes )<=1 
+            all_multiset_identical =len (multiset_hashes )<=1 
+
+            pairs_total +=1 
+            if not all_set_identical :
+                pairs_with_set_change +=1 
+            if not all_multiset_identical :
+                pairs_with_multiset_change +=1 
+
+            writer .writerow ({
+            "pair_id":key [0 ],
+            "source":key [1 ],
+            "target":key [2 ],
+            "weights_present":weights_present ,
+            "distinct_set_hashes":len (set_hashes ),
+            "distinct_multiset_hashes":len (multiset_hashes ),
+            "all_set_identical":all_set_identical ,
+            "all_multiset_identical":all_multiset_identical ,
+            "min_rows":min (row_counts )if row_counts else 0 ,
+            "max_rows":max (row_counts )if row_counts else 0 ,
+            "min_unique_smiles":min (unique_counts )if unique_counts else 0 ,
+            "max_unique_smiles":max (unique_counts )if unique_counts else 0 ,
+            })
+
+    report_summary ={
+    "pairs_total":pairs_total ,
+    "pairs_with_set_change":pairs_with_set_change ,
+    "pairs_with_multiset_change":pairs_with_multiset_change ,
+    "pairs_all_set_identical":pairs_total -pairs_with_set_change ,
+    "pairs_all_multiset_identical":pairs_total -pairs_with_multiset_change ,
+    }
+    with output_json_path .open ("w",encoding ="utf-8")as f :
+        json .dump (report_summary ,f ,indent =2 )
 
 def _resolve_column_name (fieldnames :list [str ],column_name :str )->str :
     if column_name in fieldnames :
@@ -530,6 +707,7 @@ def save_config (smiles_count :int ,pair_count :int ,weights :list [tuple [float
     "run_bidirectional":RUN_BIDIRECTIONAL ,
     "resume":RESUME ,
     "write_intermediates":WRITE_INTERMEDIATES ,
+    "write_pair_change_reports":WRITE_PAIR_CHANGE_REPORTS ,
     "pair_random_seed":PAIR_RANDOM_SEED ,
     "quiet_pipeline_prints":QUIET_PIPELINE_PRINTS ,
     "search_overrides":SEARCH_OVERRIDES ,
@@ -612,6 +790,7 @@ def main ()->None :
     "target",
     "direction",
     "smiles",
+    "canonical_smiles",
     "sa_score",
     "sim_source",
     "sim_target",
@@ -634,12 +813,18 @@ def main ()->None :
         interm_path =weight_dir /"intermediates.csv"
 
         processed_ids :set [int ]=set ()
+        pair_metrics_mode ="a"if pair_metrics_path .exists ()and RESUME else "w"
+        interm_mode ="a"if interm_path .exists ()and RESUME else "w"
+
         if RESUME and pair_metrics_path .exists ():
             processed_ids =read_processed_pair_ids (pair_metrics_path )
             print (f"Resuming: {len (processed_ids )} already processed pairs")
 
-        pair_metrics_mode ="a"if pair_metrics_path .exists ()and RESUME else "w"
-        interm_mode ="a"if interm_path .exists ()and RESUME else "w"
+            if WRITE_INTERMEDIATES and not interm_path .exists ():
+                print ("Intermediates file missing for this weight; re-running from scratch to regenerate complete artifacts.")
+                processed_ids =set ()
+                pair_metrics_mode ="w"
+                interm_mode ="w"
 
         processed_now =0 
         started =time .perf_counter ()
@@ -702,6 +887,9 @@ def main ()->None :
         with (weight_dir /"summary.json").open ("w",encoding ="utf-8")as f :
             json .dump (summary ,f ,indent =2 )
 
+        if WRITE_INTERMEDIATES and interm_path .exists ():
+            write_pair_intermediate_signatures (interm_path ,weight_dir /"pair_intermediate_signatures.csv")
+
         all_summaries .append (summary )
         print (
         f"Done {label }: coverage={summary ['coverage']:.3f}, "
@@ -740,6 +928,14 @@ def main ()->None :
         )
     else :
         print ("No summaries found. Nothing to rank.")
+
+    if WRITE_INTERMEDIATES and WRITE_PAIR_CHANGE_REPORTS :
+        weight_dirs =[OUTPUT_DIR /weight_label (a ,b ,g )for a ,b ,g in weights ]
+        change_csv =OUTPUT_DIR /"pair_weight_changes.csv"
+        change_json =OUTPUT_DIR /"pair_weight_changes_summary.json"
+        write_cross_weight_pair_change_report (weight_dirs ,change_csv ,change_json )
+        print (f"Saved cross-weight pair change report: {change_csv }")
+        print (f"Saved cross-weight pair change summary: {change_json }")
 
     elapsed_all =time .perf_counter ()-start_all 
     print ("="*80 )

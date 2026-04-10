@@ -1,0 +1,92 @@
+{
+  "input": "data/output/weight_search_full/pair_weight_jaccard.csv",
+  "weights_count": 27,
+  "weights": [
+    "a0p8_b0p05_g0p3",
+    "a0p8_b0p05_g0p5",
+    "a0p8_b0p05_g0p7",
+    "a0p8_b0p1_g0p3",
+    "a0p8_b0p1_g0p5",
+    "a0p8_b0p1_g0p7",
+    "a0p8_b0p2_g0p3",
+    "a0p8_b0p2_g0p5",
+    "a0p8_b0p2_g0p7",
+    "a1_b0p05_g0p3",
+    "a1_b0p05_g0p5",
+    "a1_b0p05_g0p7",
+    "a1_b0p1_g0p3",
+    "a1_b0p1_g0p5",
+    "a1_b0p1_g0p7",
+    "a1_b0p2_g0p3",
+    "a1_b0p2_g0p5",
+    "a1_b0p2_g0p7",
+    "a1p2_b0p05_g0p3",
+    "a1p2_b0p05_g0p5",
+    "a1p2_b0p05_g0p7",
+    "a1p2_b0p1_g0p3",
+    "a1p2_b0p1_g0p5",
+    "a1p2_b0p1_g0p7",
+    "a1p2_b0p2_g0p3",
+    "a1p2_b0p2_g0p5",
+    "a1p2_b0p2_g0p7"
+  ],
+  "pairs_count": 5,
+  "overview_png": "data/output/weight_search_full/jaccard_heatmaps/pair_jaccard_heatmaps_overview.png",
+  "pairs": [
+    {
+      "pair_id": "1",
+      "source": "CC(=O)[C@H]1CC[C@H]2[C@@H]3CCC4=CC(=O)CC[C@]4(C)[C@H]3CC[C@]12C",
+      "target": "N[C@@H](Cc1cc(I)c(Oc2ccc(O)c(I)c2)c(I)c1)C(=O)O",
+      "weights_count": 27,
+      "min_jaccard": 0.969543,
+      "max_jaccard": 1.0,
+      "mean_jaccard": 0.9922062393162394,
+      "matrix_csv": "data/output/weight_search_full/jaccard_heatmaps/pair_1_jaccard_matrix.csv",
+      "heatmap_png": "data/output/weight_search_full/jaccard_heatmaps/pair_1_jaccard_heatmap.png"
+    },
+    {
+      "pair_id": "2",
+      "source": "CC(=O)[C@H]1CC[C@H]2[C@@H]3CCC4=CC(=O)CC[C@]4(C)[C@H]3CC[C@]12C",
+      "target": "NC(=O)[C@H]1CCCC[C@H]1NC(=O)C1(NC(=O)[C@H](Cc2ccc(OP(=O)(O)O)cc2)NC(=O)OCc2cccc(N)c2)CCCCC1",
+      "weights_count": 27,
+      "min_jaccard": 0.967557,
+      "max_jaccard": 1.0,
+      "mean_jaccard": 0.9880891168091166,
+      "matrix_csv": "data/output/weight_search_full/jaccard_heatmaps/pair_2_jaccard_matrix.csv",
+      "heatmap_png": "data/output/weight_search_full/jaccard_heatmaps/pair_2_jaccard_heatmap.png"
+    },
+    {
+      "pair_id": "3",
+      "source": "CC(=O)[C@H]1CC[C@H]2[C@@H]3CCC4=CC(=O)CC[C@]4(C)[C@H]3CC[C@]12C",
+      "target": "C=C1/C(=C\\C=C2/CCC[C@]3(C)[C@@H]([C@H](C)CCCC(C)(C)O)CC[C@@H]23)C[C@@H](O)C[C@@H]1O",
+      "weights_count": 27,
+      "min_jaccard": 0.940559,
+      "max_jaccard": 1.0,
+      "mean_jaccard": 0.9767917777777777,
+      "matrix_csv": "data/output/weight_search_full/jaccard_heatmaps/pair_3_jaccard_matrix.csv",
+      "heatmap_png": "data/output/weight_search_full/jaccard_heatmaps/pair_3_jaccard_heatmap.png"
+    },
+    {
+      "pair_id": "4",
+      "source": "CC(=O)[C@H]1CC[C@H]2[C@@H]3CCC4=CC(=O)CC[C@]4(C)[C@H]3CC[C@]12C",
+      "target": "OC[C@H]1O[C@H](O)[C@H](O)[C@@H](O)[C@H]1O",
+      "weights_count": 27,
+      "min_jaccard": 0.931429,
+      "max_jaccard": 1.0,
+      "mean_jaccard": 0.9750584957264958,
+      "matrix_csv": "data/output/weight_search_full/jaccard_heatmaps/pair_4_jaccard_matrix.csv",
+      "heatmap_png": "data/output/weight_search_full/jaccard_heatmaps/pair_4_jaccard_heatmap.png"
+    },
+    {
+      "pair_id": "5",
+      "source": "CC(=O)[C@H]1CC[C@H]2[C@@H]3CCC4=CC(=O)CC[C@]4(C)[C@H]3CC[C@]12C",
+      "target": "CC1(C)CC[C@H](c2cnc3ccccc3c2)c2cc(C(=O)Nc3ccc(C(=O)O)cc3)ccc21",
+      "weights_count": 27,
+      "min_jaccard": 0.872593,
+      "max_jaccard": 1.0,
+      "mean_jaccard": 0.942024811965812,
+      "matrix_csv": "data/output/weight_search_full/jaccard_heatmaps/pair_5_jaccard_matrix.csv",
+      "heatmap_png": "data/output/weight_search_full/jaccard_heatmaps/pair_5_jaccard_heatmap.png"
+    }
+  ]
+}
